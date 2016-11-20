@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>Todo-App</title>
+    <meta charset="UTF-8" />
+    <meta name="author" content="Pratik Dashore" />
+
+    <link rel="stylesheet" href="css/bootstrap.min.css" />
+    <link rel="stylesheet" href="css/main.css" />
+
+
+    <script src="libs/angular.min.js"></script>
+    <script src="libs/angular-local-storage.min.js"></script>
+    <script src="libs/angular-ui-router.min.js"></script>
+    <script src="libs/angular-resource.js"></script>
+    <script src="libs/jquery.min.js"></script>
+    <script src="libs/jquery-ui.min.js"></script>
+    <script src="libs/jquery.ui.touch-punch.min.js"></script>
+    <script src="libs/bootstrap.min.js"></script>
+
+    <script src="app/app.js"></script>
+    <script src="app/config.route.js"></script>
+    <script src="app/factories/taskFactory.js"></script>
+    <script src="app/factories/localStorageFactory.js"></script>
+    <script src="app/factories/webApiFactory.js"></script>
+    <script src="app/controllers/taskCtrl.js"></script>
+    
+
+</head>
+
+<body ng-app="toDoApp">
+    <!--UI router is not supported in file mode need to run html page as app page in server thus rollbacking ui router logic
+    <div ui-view="navContainerView"></div>
+    <div class="row">
+        <div class="col-md-12 col-sm-12" ui-view="mainContainerView"></div>
+    </div>-->
+    <div class="container" id="playground" ng-controller='app.controllers.taskController as ctrl'>
+
+
+        <div class="row">
+            <div class="col-xs-3 col-md-3">
+                <div class="list-group">
+                    <a href="#" class="list-group-item" ng-class="{'active' : ctrl.currentShow === 0}" ng-click="ctrl.changeTodo(0)">
+                        <span class="badge">{{ctrl.toDoList.length}}</span> Tasks
+                    </a>
+                    <a href="#" class="list-group-item" ng-class="{'active' : ctrl.currentShow === 1}" ng-click="ctrl.changeTodo(1)">
+                        <span class="badge">{{ctrl.searchList.length}}</span> Saved Searches
+                    </a>
+                </div>
+            </div>
+            <div class="col-xs-8 col-md-8">
+                <div class="row">
+                    <div class="col-xs-7">
+                        <div class="input-group">
+                            <span class="input-group-btn">
+								<button class="btn btn-default" type="button"><span class="glyphicon glyphicon-search"></span></button>
+                            </span>
+                            <input type="text" class="form-control" placeholder="Search" ng-model="ctrl.todoSearch">
+                            <span class="input-group-btn">
+								<button class="btn btn-default" type="button" ng-click="ctrl.addSearch()"><span class="glyphicon glyphicon-saved"></span></button>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-xs-5">
+                        <ul class="nav nav-pills todo-filter">
+                            <li ng-class="{'active' : ctrl.show == 'All' }" ng-click="ctrl.show='All'"><a href="#">All</a></li>
+                            <li ng-class="{'active' : ctrl.show == 'Incomplete' }" ng-click="ctrl.show='Incomplete'"><a href="#">Incomplete</a></li>
+                            <li ng-class="{'active' : ctrl.show == 'Complete' }" ng-click="ctrl.show='Complete'"><a href="#">Complete</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="row">
+
+                    <form class="form-inline" role="form">
+                        <div class="form-group">
+                            <label class="sr-only" for="title">Title:</label>
+                            <input type="text" class="form-control" id="title" ng-model="ctrl.newToDo.title" placeholder="Title">
+                        </div>
+                        <div class="form-group">
+                            <label class="sr-only" for="tag">Tag:</label>
+                            <input type="text" class="form-control" id="tag" ng-model="ctrl.newToDo.tag" placeholder="Tag">
+                        </div>
+                        <div class="form-group">
+                            <label class="sr-only" for="priority">Priority: </label>
+                            <select id="priority" class="form-control" ng-model="ctrl.newToDo.priority">
+                                <option ng-repeat="option in ctrl.availablePriorities" value="{{option.id}}">{{option.name}}</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="sr-only" for="dueDate">DueDate:</label>
+                            <input type="date" class="form-control" id="dueDate" ng-model="ctrl.newToDo.dueDate" placeholder="Tag">
+                        </div>
+                        <div class="form-group">
+                            <label class="sr-only" for="context">Context:</label>
+                            <input type="text" class="form-control" id="context" ng-model="ctrl.newToDo.context" placeholder="Contexts">
+                        </div>
+                        <div class="form-group">
+                            <label class="sr-only" for="projects">Projects:</label>
+                            <input type="text" class="form-control" id="projects" ng-model="ctrl.newToDo.projects" placeholder="Projects">
+                        </div>
+
+                        <button id="todoSubmit" type="submit" class="btn btn-default" ng-click="ctrl.addTodo()">Add</button>
+                    </form>
+
+                </div>
+                <div class="row" ng-if="ctrl.currentShow === 0">
+                    <ul class="list-unstyled" ng-model="ctrl.toDo">
+                        <li class="todoTask" ng-repeat="todo in ctrl.toDoList | filter:ctrl.showFn | filter :ctrl.todoSearch ">
+                            
+                            <input class="checkbox" ng-model="todo.completed" ng-change="ctrl.toggleCompleted(todo)" type="checkbox">
+                            <p><b> {{todo.title}} due {{todo.dueDate | date : 'mediumDate'}} {{todo.tag}} priority: {{todo.priority}} {{todo.contexts}} {{todo.projects}} </b></p>
+                            
+                            <button type="button" class="close pull-right" aria-hidden="true" ng-click="ctrl.removeTodo(todo)">&times;</button>
+                            
+                        </li>
+                    </ul>
+                    <button ng-click="ctrl.clearCompletedTodos()" class="btn btn-primary">Clear completed</button>
+                </div>
+                <div class="row" ng-if="ctrl.currentShow === 1">
+                    <ul class="list-unstyled">
+                        <li class="todoTask" ng-repeat="item in ctrl.searchList">
+                            <a href="#" class="edit-in-place" ng-click="ctrl.showSearchResult(item.keyword)">{{item.keyword}}</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>
