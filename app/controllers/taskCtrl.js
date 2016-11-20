@@ -1,8 +1,8 @@
-(function () {
+(function() {
     'use strict';
     angular.module('toDoApp').controller('app.controllers.taskController', [
         'app.factory.taskStore',
-        function (taskStore) {
+        function(taskStore) {
             var webApiPromise;
             var vm = this;
             vm.taskStoreLocal = taskStore;
@@ -12,31 +12,30 @@
             vm.newToDo = {};
             vm.show = "All";
             vm.currentShow = 0;
-            vm.availablePriorities = [{id:1, name: 'Priority-1'}, {id:2, name: 'Priority-2'}, {id:3, name: 'Priority-3'}]
-
+            vm.availablePriorities = [{ id: 1, name: 'Priority-1' }, { id: 2, name: 'Priority-2' }, { id: 3, name: 'Priority-3' }]
 
             function load() {
-                vm.taskStoreLocal.getHttpPromise().then(function (promise) {
+                vm.taskStoreLocal.getHttpPromise().then(function(promise) {
                     webApiPromise = promise;
-                    promise.get().then(function (data) {
+                    promise.get().then(function(data) {
                         vm.toDoList = data;
                     });
-                    promise.getSearchList().then(function (data) {
+                    promise.getSearchList().then(function(data) {
                         vm.searchList = data;
                     });
-                    
+
 
                 });
             }
             load();
 
-            vm.addTodo = function () {
+            vm.addTodo = function() {
                 var newTodo = {
                     title: vm.newToDo.title.trim(),
                     tag: vm.newToDo.tag.trim(),
                     priority: vm.newToDo.priority,
                     dueDate: vm.newToDo.dueDate,
-                    contexts : vm.newToDo.context,
+                    contexts: vm.newToDo.context,
                     projects: vm.newToDo.projects,
                     completed: false
                 };
@@ -50,19 +49,19 @@
                     .then(function success() {
                         vm.newToDo = {};
                     })
-                    .finally(function () {
+                    .finally(function() {
                         vm.saving = false;
                     });
             };
-            
-            vm.addSearch = function () {
+
+            vm.addSearch = function() {
 
                 if (angular.isUndefined(vm.todoSearch)) {
                     return;
                 }
 
                 var newSearch = {
-                    keyword:vm.todoSearch.trim()
+                    keyword: vm.todoSearch.trim()
                 };
 
                 vm.saving = true;
@@ -70,46 +69,46 @@
                     .then(function success() {
                         vm.newSearch = {};
                     })
-                    .finally(function () {
+                    .finally(function() {
                         vm.saving = false;
                     });
             };
 
-            vm.removeTodo = function (todo) {
+            vm.removeTodo = function(todo) {
                 webApiPromise.delete(todo);
             };
 
-            vm.saveTodo = function (todo) {
+            vm.saveTodo = function(todo) {
                 webApiPromise.put(todo);
             };
 
-            vm.clearCompletedTodos = function () {
+            vm.clearCompletedTodos = function() {
                 webApiPromise.clearCompleted();
             };
 
-            vm.toggleCompleted = function (todo, completed) {
+            vm.toggleCompleted = function(todo, completed) {
                 if (angular.isDefined(completed)) {
                     todo.completed = completed;
                 }
                 webApiPromise.put(todo, vm.toDoList.indexOf(todo))
-                    .then(function success() { }, function error() {
+                    .then(function success() {}, function error() {
                         todo.completed = !todo.completed;
                     });
             };
 
-            vm.markAll = function (completed) {
-                vm.toDoList.forEach(function (todo) {
+            vm.markAll = function(completed) {
+                vm.toDoList.forEach(function(todo) {
                     if (todo.completed !== completed) {
                         vm.toggleCompleted(todo, completed);
                     }
                 });
             };
 
-            vm.changeTodo = function (i) {
+            vm.changeTodo = function(i) {
                 vm.currentShow = i;
             };
 
-            vm.showFn = function (todo) {
+            vm.showFn = function(todo) {
                 if (vm.show === "All") {
                     return true;
                 } else if (todo.completed && vm.show === "Complete") {
@@ -120,12 +119,12 @@
                     return false;
                 }
             };
-            
-            vm.showSearchResult = function(keyWord){
-              vm.todoSearch = keyWord;
-              vm.currentShow = 0;  
+
+            vm.showSearchResult = function(keyWord) {
+                vm.todoSearch = keyWord;
+                vm.currentShow = 0;
             };
 
         }
     ]);
-} ());
+}());
